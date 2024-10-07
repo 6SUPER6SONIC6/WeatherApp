@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Weather App</string>
+    <string name="recent_searches_card_title">Recent searches</string>
+    <string name="recent_searches_card_empty_title">Recent searches are empty</string>
+    <string name="enter_location_dialog_title">Enter a location</string>
+    <string name="enter_location_dialog_placeholder">Canterbury</string>
+    <string name="enter_location_dialog_button_title">Search current weather</string>
+    <string name="current_temp_card_title">Current temperature</string>
+    <string name="current_temp_card_btn_label">Search a new location</string>
+    <string name="recent_searches_card_btn_label">Clear recent searches</string>
 </resources>

@@ -1,11 +1,19 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.kapt)
+    alias(libs.plugins.hilt)
 }
 
 android {
     namespace = "com.supersonic.weatherapp"
     compileSdk = 34
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.supersonic.weatherapp"
@@ -18,6 +26,10 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+        buildConfigField("String", "OPEN_WEATHER_API_KEY", properties.getProperty("OPEN_WEATHER_API_KEY"))
     }
 
     buildTypes {
@@ -46,6 +58,9 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+    kapt {
+        correctErrorTypes = true
     }
 }
 
@@ -76,4 +91,8 @@ dependencies {
     implementation(libs.okhttp.logging.interceptor)
 
     implementation(libs.lifecycle.viewmodel)
+
+    implementation(libs.hilt.android.core)
+    kapt(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 }
