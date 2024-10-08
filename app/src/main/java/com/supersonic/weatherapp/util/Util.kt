@@ -17,9 +17,11 @@ fun convertUnixToTime(dt: Long): String {
 }
 
 fun getRelativeTime(timestamp: Long): String {
-    return DateUtils.getRelativeTimeSpanString(
+    val realativeTime = DateUtils.getRelativeTimeSpanString(
         timestamp,
         System.currentTimeMillis(),
         DateUtils.MINUTE_IN_MILLIS
     ).toString()
+
+    return realativeTime.replace("minute", "min").replace("minutes", "mins")
 }
