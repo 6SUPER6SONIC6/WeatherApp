@@ -27,6 +27,6 @@ data class WeatherCondition(
 )
 
 data class Sys(
-    val country: String        // Country code (e.g., "US", "IT")
+    val country: String
 )
 

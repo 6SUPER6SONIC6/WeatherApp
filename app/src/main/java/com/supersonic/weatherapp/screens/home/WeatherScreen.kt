@@ -54,6 +54,7 @@ import com.supersonic.weatherapp.R
 import com.supersonic.weatherapp.model.data.HourlyWeather
 import com.supersonic.weatherapp.util.convertUnixToTime
 import com.supersonic.weatherapp.util.getCountryName
+import com.supersonic.weatherapp.util.getRelativeTime
 import kotlin.math.roundToInt
 
 @Composable
@@ -71,9 +72,7 @@ fun WeatherScreen(viewModel: WeatherViewModel = hiltViewModel()) {
             weatherState = weatherState,
             hourlyForecastState = hourlyForecastState,
             recentSearches = viewModel.recentSearchesList,
-            onAddSearch = {
-                viewModel.addSearch(it)
-            },
+            onAddSearch = viewModel::addSearch,
             onClearRecentSearches = { viewModel.clearSearches() },
             onFetchWeather = {
                 viewModel.fetchHourlyForecast(it)
@@ -88,8 +87,8 @@ private fun WeatherScreenContent (
     modifier: Modifier = Modifier,
     weatherState: WeatherUiState,
     hourlyForecastState: HourlyForecastUiState,
-    recentSearches: List<String>,
-    onAddSearch:(String) -> Unit,
+    recentSearches: List<RecentSearch>,
+    onAddSearch:(String, String) -> Unit,
     onClearRecentSearches: () -> Unit,
     onFetchWeather: (String) -> Unit
 ) {
@@ -116,7 +115,7 @@ private fun WeatherScreenContent (
             is WeatherUiState.Success -> {
                 showLoader = false
                 currentTemp = weatherState.weather.main.temp
-                onAddSearch("${weatherState.weather.name}, ${getCountryName(weatherState.weather.sys.country)}")
+                onAddSearch(weatherState.weather.name, weatherState.weather.sys.country)
             }
             is WeatherUiState.Error -> {
                 showLoader = false
@@ -200,7 +199,9 @@ private fun CurrentTempCard(
                         text = "C",
                         fontSize = 31.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.Top).padding(top = 8.dp)
+                        modifier = Modifier
+                            .align(Alignment.Top)
+                            .padding(top = 8.dp)
                         )
                 }
                 Text(
@@ -239,7 +240,7 @@ private fun CurrentTempCard(
 @Composable
 private fun RecentSearchesCard(
     modifier: Modifier = Modifier,
-    recentSearches: List<String>,
+    recentSearches: List<RecentSearch>,
     onClearRecentSearches: () -> Unit
 ) {
 
@@ -266,23 +267,43 @@ private fun RecentSearchesCard(
             AnimatedVisibility(recentSearches.isNotEmpty()){
                 Spacer(modifier = Modifier.height(16.dp))
             }
-            LazyColumn {
-                items(recentSearches){ city ->
-                    Text(
-                        text = city,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    )
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(recentSearches){ recentSearch ->
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ){
+                        Text(
+                            text = "${recentSearch.city}, ${getCountryName(recentSearch.countryCode)}",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier
+                                .padding(vertical = 2.dp)
+                                .align(Alignment.CenterStart)
+                        )
+                        Text(
+                            text = getRelativeTime(recentSearch.timestamp),
+                            color = Color.LightGray,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier
+                                .padding(vertical = 2.dp)
+                                .align(Alignment.CenterEnd)
+                        )
+                    }
+                }
+                item {
+                    AnimatedVisibility(recentSearches.isNotEmpty()){
+                        Spacer(modifier = Modifier.height(16.dp))
+                        CustomButton(
+                            onClick = onClearRecentSearches,
+                            label = stringResource(R.string.recent_searches_card_btn_label)
+                        )
+                    }
                 }
             }
-            AnimatedVisibility(recentSearches.isNotEmpty()){
-                Spacer(modifier = Modifier.height(16.dp))
-                CustomButton(
-                    onClick = onClearRecentSearches,
-                    label = stringResource(R.string.recent_searches_card_btn_label)
-                )
-            }
+
         }
     }
 

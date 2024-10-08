@@ -1,10 +1,12 @@
 package com.supersonic.weatherapp
 
+import android.content.Context
 import com.supersonic.weatherapp.model.WeatherRepository
 import com.supersonic.weatherapp.model.WeatherService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -31,7 +33,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideWeatherRepository(weatherService: WeatherService): WeatherRepository {
-        return WeatherRepository(weatherService)
+    fun provideWeatherRepository(
+        weatherService: WeatherService,
+        @ApplicationContext context: Context
+    ): WeatherRepository {
+        return WeatherRepository(weatherService, context)
     }
 }

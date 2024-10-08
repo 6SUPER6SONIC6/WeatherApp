@@ -21,10 +21,14 @@ class WeatherViewModel @Inject constructor(
     private val _hourlyForecastState = MutableStateFlow<HourlyForecastUiState>(HourlyForecastUiState.Idle)
     val hourlyForecastState: StateFlow<HourlyForecastUiState> = _hourlyForecastState
 
-    private val _recentSearchesList = mutableStateListOf<String>()
-    val recentSearchesList: List<String> = _recentSearchesList.asReversed()
+    private val _recentSearchesList = mutableStateListOf<RecentSearch>()
+    val recentSearchesList: List<RecentSearch> = _recentSearchesList.asReversed()
 
     private val apiKey = BuildConfig.OPEN_WEATHER_API_KEY
+
+    init {
+        _recentSearchesList.addAll(repository.getRecentSearches())
+    }
 
     fun fetchWeather(city: String) {
         viewModelScope.launch {
@@ -48,9 +52,11 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    fun addSearch(cityName: String){
-        if (!_recentSearchesList.contains(cityName)){
-            _recentSearchesList.add(cityName)
+    fun addSearch(cityName: String, countryCode: String){
+        val newSearch = RecentSearch(city = cityName, countryCode = countryCode)
+        if (!_recentSearchesList.contains(newSearch)){
+            _recentSearchesList.add(newSearch)
+            saveSearches()
         }
     }
 
@@ -58,7 +64,17 @@ class WeatherViewModel @Inject constructor(
         _weatherState.value = WeatherUiState.Idle
         _hourlyForecastState.value = HourlyForecastUiState.Idle
         _recentSearchesList.clear()
+        repository.clearRecentSearches()
     }
 
+    private fun saveSearches() {
+        repository.saveRecentSearches(_recentSearchesList)
+    }
 
 }
+
+data class RecentSearch(
+    val city: String,
+    val countryCode: String,
+    val timestamp: Long = System.currentTimeMillis()
+)
